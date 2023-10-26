@@ -1,3 +1,6 @@
+
+BOT_TOKEN = "6237932576:AAFiXs2J4caQG1aGycoaah0IuRU2IsMe5Dc"
+
 import asyncio
 import logging
 from aiohttp import web
@@ -8,9 +11,11 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters import CommandStart
 from aiogram.utils import executor
 from environs import Env
-BOT_TOKEN = "6237932576:AAFiXs2J4caQG1aGycoaah0IuRU2IsMe5Dc"
 
-ENDPOINT = "https://www.canva.com/brand/join?token=2YjFf01xvIS38UY23l6nyA&referrer=team-invite"
+GROUP_ID = -1002086168629  # Your private group ID
+
+ENDPOINT = "https://www.canva.com/brand/join?token=agij8iElQqS-q6YzbFHmsQ&brandingVariant=edu&referrer=team-invite"
+
 
 # Initialize bot and dispatcher
 bot = Bot(token=BOT_TOKEN)
@@ -58,11 +63,9 @@ async def delete_buttons(chat_id, message_id, delay_minutes):
 @dp.message_handler(CommandStart())
 async def cmd_start(msg: types.Message):
     user_id = msg.from_user.id
-    is_member_abhibots = await bot.get_chat_member("@abhibots", user_id)
-    is_member_abyproof = await bot.get_chat_member("@abyproof", user_id)
+    is_member_private_group = await bot.get_chat_member(GROUP_ID, user_id)
     
-    if (is_member_abhibots.status == "member" or is_member_abhibots.status == "administrator" or is_member_abhibots.status == "creator") and \
-       (is_member_abyproof.status == "member" or is_member_abyproof.status == "administrator" or is_member_abyproof.status == "creator"):
+    if (is_member_private_group.status == "member" or is_member_private_group.status == "administrator" or is_member_private_group.status == "creator"):
         
         # Provide instructions for Canva login
         login_instructions = "To join the Canva team, please log in using your email and enter the OTP you receive."
@@ -78,19 +81,17 @@ async def cmd_start(msg: types.Message):
         asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=10))
 
     else:
-        # Create inline keyboard buttons to join channels
-        join_abhibots_button = types.InlineKeyboardButton("Join @abhibots", url="https://t.me/abhibots")
-        join_abyproof_button = types.InlineKeyboardButton("Join @abyproof", url="https://t.me/abyproof")
+        # Send the joining link as an inline keyboard button
+        join_link = "https://cosmofeed.com/vig/653a165dd2c541001d1c452e"
         
         keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
-            [join_abhibots_button, join_abyproof_button]
+            [types.InlineKeyboardButton(text="Join Here", url=join_link)]
         ])
         
-        # Send the instructions message
-        instructions_message = await msg.reply("To use this bot, please join both @abhibots and @abyproof channels by clicking the respective links below and then restart the bot.", reply_markup=keyboard)
-        
-        # Schedule the deletion of buttons after 10 minutes
-        asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=10))
+        await msg.reply("To get Canva , please click the button below to join Group by paying and restart bot after joining:", reply_markup=keyboard)
+
+        # Schedule the deletion of this message after 10 minutes
+        asyncio.create_task(delete_buttons(msg.chat.id, msg.message_id, delay_minutes=10))
 
 def main():
     executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)
