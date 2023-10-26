@@ -78,7 +78,7 @@ async def cmd_start(msg: types.Message):
         instructions_message = await msg.reply(login_instructions, reply_markup=keyboard)
         
         # Schedule the deletion of buttons after 10 minutes
-        asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=10))
+        asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=5))
 
     else:
         # Send the joining link as an inline keyboard button
@@ -91,7 +91,7 @@ async def cmd_start(msg: types.Message):
         await msg.reply("To get Canva , please click the button below to join Group by paying and restart bot after joining:", reply_markup=keyboard)
 
         # Schedule the deletion of this message after 10 minutes
-        asyncio.create_task(delete_buttons(msg.chat.id, msg.message_id, delay_minutes=10))
+        asyncio.create_task(delete_buttons(msg.chat.id, msg.message_id, delay_minutes=5))
 
 def main():
     executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)
