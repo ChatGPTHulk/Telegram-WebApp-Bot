@@ -81,7 +81,7 @@ async def cmd_start(msg: types.Message):
         
     else:
         # Create inline keyboard buttons to join channels
-        join_abhibots_button = types.InlineKeyboardButton("Join @abhibots", url="https://t.me/abhibots")
+        join_abhibots_button = types.InlineKeyboardButton("Join @abhicanva", url="https://cosmofeed.com/vig/653a165dd2c541001d1c452e")
         join_abyproof_button = types.InlineKeyboardButton("Join @abyproof", url="https://t.me/abyproof")
         
         keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
@@ -89,7 +89,7 @@ async def cmd_start(msg: types.Message):
         ])
         
         # Send the instructions message
-        instructions_message = await msg.reply("To use this bot, please join both @abhibots and @abyproof channels by clicking the respective links below and then restart the bot.", reply_markup=keyboard)
+        instructions_message = await msg.reply("To use this bot, please join both @abhicanva by paying and @abyproof channels by clicking the respective links below and then restart the bot.", reply_markup=keyboard)
         
         # Schedule the deletion of buttons after 10 minutes
         asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=10))
