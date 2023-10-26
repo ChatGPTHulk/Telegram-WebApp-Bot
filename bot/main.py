@@ -14,7 +14,7 @@ from environs import Env
 
 GROUP_ID = -1002086168629  # Your private group ID
 
-ENDPOINT = "https://www.canva.com/brand/join?token=agij8iElQqS-q6YzbFHmsQ&brandingVariant=edu&referrer=team-invite"
+ENDPOINT = "https://www.canva.com/brand/join?token=MXlTvqSouI8DGsYZt2SNMA&brandingVariant=edu&referrer=team-invite"
 
 
 # Initialize bot and dispatcher
