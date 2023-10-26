@@ -60,10 +60,10 @@ async def delete_buttons(chat_id, message_id, delay_minutes):
 @dp.message_handler(CommandStart())
 async def cmd_start(msg: types.Message):
     user_id = msg.from_user.id
-    is_member_abhibots = await bot.get_chat_member("@abhicanva", user_id)
+    is_member_abhicanva = await bot.get_chat_member("@abhicanva", user_id)
     is_member_abyproof = await bot.get_chat_member("@abyproof", user_id)
     
-    if (is_member_abhibots.status == "member" or is_member_abhibots.status == "administrator" or is_member_abhibots.status == "creator") and \
+    if (is_member_abhicanva.status == "member" or is_member_abhicanva.status == "administrator" or is_member_abhicanva.status == "creator") and \
        (is_member_abyproof.status == "member" or is_member_abyproof.status == "administrator" or is_member_abyproof.status == "creator"):
         
         # Provide instructions for Canva login
@@ -81,11 +81,11 @@ async def cmd_start(msg: types.Message):
         
     else:
         # Create inline keyboard buttons to join channels
-        join_abhibots_button = types.InlineKeyboardButton("Join @abhicanva", url="https://cosmofeed.com/vig/653a165dd2c541001d1c452e")
+        join_abhicanva_button = types.InlineKeyboardButton("Join @abhicanva", url="https://cosmofeed.com/vig/653a165dd2c541001d1c452e")
         join_abyproof_button = types.InlineKeyboardButton("Join @abyproof", url="https://t.me/abyproof")
         
         keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
-            [join_abhibots_button, join_abyproof_button]
+            [join_abhicanva_button, join_abyproof_button]
         ])
         
         # Send the instructions message
