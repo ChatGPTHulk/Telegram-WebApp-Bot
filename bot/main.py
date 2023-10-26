@@ -60,7 +60,7 @@ async def delete_buttons(chat_id, message_id, delay_minutes):
 @dp.message_handler(CommandStart())
 async def cmd_start(msg: types.Message):
     user_id = msg.from_user.id
-    is_member_abhibots = await bot.get_chat_member("@abhibots", user_id)
+    is_member_abhibots = await bot.get_chat_member("@abhicanva", user_id)
     is_member_abyproof = await bot.get_chat_member("@abyproof", user_id)
     
     if (is_member_abhibots.status == "member" or is_member_abhibots.status == "administrator" or is_member_abhibots.status == "creator") and \
