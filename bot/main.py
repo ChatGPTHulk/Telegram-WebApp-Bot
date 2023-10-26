@@ -1,100 +1,89 @@
 
-BOT_TOKEN = "6237932576:AAFiXs2J4caQG1aGycoaah0IuRU2IsMe5Dc"
-
-import asyncio
-import logging
-from aiohttp import web
-import aiohttp_jinja2
-import jinja2
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher.filters import CommandStart
-from aiogram.utils import executor
-from environs import Env
-
-GROUP_ID = -1002086168629  # Your private group ID
-
-ENDPOINT = "https://www.canva.com/brand/join?token=MXlTvqSouI8DGsYZt2SNMA&brandingVariant=edu&referrer=team-invite"
-
-
-# Initialize bot and dispatcher
-bot = Bot(token=BOT_TOKEN)
-storage = MemoryStorage()
-dp = Dispatcher(bot=bot, storage=storage)
-
-logging.basicConfig(level=logging.ERROR)
-
-# Placeholder function for web_start
-async def web_start(request):
-    # Your implementation here
-    return web.Response(text="Web Start Placeholder")
-
-# Placeholder function for web_send_message
-async def web_send_message(request):
-    # Your implementation here
-    return web.Response(text="Web Send Message Placeholder")
-
-# Placeholder function for web_check_user_data
-async def web_check_user_data(request):
-    # Your implementation here
-    return web.Response(text="Web Check User Data Placeholder")
-
-app = web.Application()
-app.add_routes([web.get('/web-start', web_start),
-                web.post('/sendMessage', web_send_message),
-                web.post('/checkUserData', web_check_user_data)])
-aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('web'), enable_async=True)
-
-async def on_startup(dps: Dispatcher):
-    loop = asyncio.get_event_loop()
-    loop.create_task(web._run_app(app, host="0.0.0.0", port=45678))
-
-async def on_shutdown(dps: Dispatcher):
-    await dps.storage.close()
-    await dps.storage.wait_closed()
-
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from collections import defaultdict
 import asyncio
 
-# Define a function to delete buttons after a specified delay
-async def delete_buttons(chat_id, message_id, delay_minutes):
-    await asyncio.sleep(delay_minutes * 60)  # Convert minutes to seconds
-    await bot.delete_message(chat_id, message_id)
+API_TOKEN = '6119053767:AAG7N06GXeHT8dAlWyQ3z86XnHjMfqapOAE'
 
-@dp.message_handler(CommandStart())
-async def cmd_start(msg: types.Message):
-    user_id = msg.from_user.id
-    is_member_private_group = await bot.get_chat_member(GROUP_ID, user_id)
-    
-    if (is_member_private_group.status == "member" or is_member_private_group.status == "administrator" or is_member_private_group.status == "creator"):
-        
-        # Provide instructions for Canva login
-        login_instructions = "To join the Canva team, please log in using your email and enter the OTP you receive."
-        
-        keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
-            [types.InlineKeyboardButton(text="😎 Join Canva Team", web_app=types.WebAppInfo(url=f"{ENDPOINT}"))]
-        ])
-        
-        # Send the instructions message
-        instructions_message = await msg.reply(login_instructions, reply_markup=keyboard)
-        
-        # Schedule the deletion of buttons after 10 minutes
-        asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=5))
 
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
+votes = defaultdict(lambda: defaultdict(int)) # user_id: {voter_id: vote}
+ban_counts = defaultdict(int)
+
+
+
+@dp.message_handler(commands=['start'])
+async def send_welcome(message: types.Message):
+    welcome_text = """
+Hello! I'm here to help manage this group. Here's what I can do:
+
+1. Any user can initiate a vote to ban another user by replying to their message with the /ban command.
+2. After reaching 5 votes in 5 Min.. user will be banned from Group.
+
+Please use these commands responsibly!
+    """
+    await message.answer(welcome_text)
+
+@dp.message_handler(content_types=['new_chat_members'])
+async def welcome_new_member(message: types.Message):
+    for new_member in message.new_chat_members:
+        welcome_message = await bot.send_message(chat_id=message.chat.id, text=f'Welcome, {new_member.full_name}!\n\nPlease follow the guidelines:\n1. Be respectful to each other.\n2. No spamming.\n3. Stay on topic.')
+        await asyncio.sleep(300)  # Wait for 1 minute
+        await welcome_message.delete()  # Delete the welcome message
+    await message.delete()  # Delete the service message about new members
+
+
+
+@dp.message_handler(commands=['ban'])
+async def start_vote(message: types.Message):
+    user_id = message.reply_to_message.from_user.id if message.reply_to_message else None
+    if user_id:
+        user_status = await bot.get_chat_member(chat_id=message.chat.id, user_id=user_id)
+        if user_status.status not in ['creator', 'administrator']:  # Don't start vote for admin/owner
+            keyboard = InlineKeyboardMarkup()
+            ban_btn = InlineKeyboardButton("Ban", callback_data=f"ban_{user_id}")
+            unban_btn = InlineKeyboardButton("Unban", callback_data=f"unban_{user_id}")
+            keyboard.add(ban_btn, unban_btn)
+            vote_message = await bot.send_message(chat_id=message.chat.id, text='Voting started. Choose an option:', reply_markup=keyboard)
+            await asyncio.sleep(60)  # Wait for 1 minute
+            await vote_message.delete()  # Delete the vote message
+        else:
+            await message.reply('You can\'t start a ban vote for an admin or the group owner.')
+
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('ban_'))
+async def process_callback_ban(callback_query: types.CallbackQuery):
+    user_id = int(callback_query.data.split("_")[1])
+    voter_id = callback_query.from_user.id
+
+    if votes[user_id][voter_id] == 0:
+        votes[user_id][voter_id] = 1
+        ban_counts[user_id] += 1
+
+    if ban_counts[user_id] >= 5: # If ban votes reach 2
+        try:
+            await bot.kick_chat_member(chat_id=callback_query.message.chat.id, user_id=user_id)
+            await bot.answer_callback_query(callback_query.id, text='User has been removed due to majority vote.')
+            del votes[user_id]
+            del ban_counts[user_id]
+        except Exception as e:
+            await bot.answer_callback_query(callback_query.id, text='An error occurred while trying to remove the user.')
     else:
-        # Send the joining link as an inline keyboard button
-        join_link = "https://cosmofeed.com/vig/653a165dd2c541001d1c452e"
-        
-        keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
-            [types.InlineKeyboardButton(text="Join Here", url=join_link)]
-        ])
-        
-        await msg.reply("To get Canva , please click the button below to join Group by paying and restart bot after joining:", reply_markup=keyboard)
+        await bot.answer_callback_query(callback_query.id, text=f'Vote registered. Current vote count for this user: {ban_counts[user_id]}')
 
-        # Schedule the deletion of this message after 10 minutes
-        asyncio.create_task(delete_buttons(msg.chat.id, msg.message_id, delay_minutes=5))
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('unban_'))
+async def process_callback_unban(callback_query: types.CallbackQuery):
+    user_id = int(callback_query.data.split("_")[1])
+    voter_id = callback_query.from_user.id
 
-def main():
-    executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)
+    if votes[user_id][voter_id] == 1:
+        votes[user_id][voter_id] = 0
+        ban_counts[user_id] -= 1
 
-if __name__ == "__main__":
-    main()
+    await bot.answer_callback_query(callback_query.id, text=f'Unban vote registered. Current vote count for this user: {ban_counts[user_id]}')
+
+if __name__ == '__main__':
+    from aiogram import executor
+    executor.start_polling(dp, skip_updates=True)
