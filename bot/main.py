@@ -21,7 +21,7 @@ async def send_welcome(message: types.Message):
     welcome_text = """
 Hello! I'm here to help manage this group. Here's what I can do:
 
-1. Any user can initiate a vote to ban another user by replying to their message with the /ban command.
+1. Any user can initiate a vote to ban any Spammers by replying to their message with the /ban command.
 2. After reaching 5 votes in 5 Min.. user will be banned from Group.
 
 Please use these commands responsibly!
