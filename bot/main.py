@@ -48,8 +48,6 @@ async def on_shutdown(dps: Dispatcher):
     await dps.storage.close()
     await dps.storage.wait_closed()
 
-import datetime
-
 import asyncio
 
 # Define a function to delete buttons after a specified delay
@@ -60,10 +58,10 @@ async def delete_buttons(chat_id, message_id, delay_minutes):
 @dp.message_handler(CommandStart())
 async def cmd_start(msg: types.Message):
     user_id = msg.from_user.id
-    is_member_abhicanva = await bot.get_chat_member("@abhicanva", user_id)
+    is_member_abhibots = await bot.get_chat_member("@abhibots", user_id)
     is_member_abyproof = await bot.get_chat_member("@abyproof", user_id)
     
-    if (is_member_abhicanva.status == "member" or is_member_abhicanva.status == "administrator" or is_member_abhicanva.status == "creator") and \
+    if (is_member_abhibots.status == "member" or is_member_abhibots.status == "administrator" or is_member_abhibots.status == "creator") and \
        (is_member_abyproof.status == "member" or is_member_abyproof.status == "administrator" or is_member_abyproof.status == "creator"):
         
         # Provide instructions for Canva login
@@ -78,18 +76,18 @@ async def cmd_start(msg: types.Message):
         
         # Schedule the deletion of buttons after 10 minutes
         asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=10))
-        
+
     else:
         # Create inline keyboard buttons to join channels
-        join_abhicanva_button = types.InlineKeyboardButton("Join @abhicanva", url="https://cosmofeed.com/vig/653a165dd2c541001d1c452e")
+        join_abhibots_button = types.InlineKeyboardButton("Join @abhibots", url="https://t.me/abhibots")
         join_abyproof_button = types.InlineKeyboardButton("Join @abyproof", url="https://t.me/abyproof")
         
         keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
-            [join_abhicanva_button, join_abyproof_button]
+            [join_abhibots_button, join_abyproof_button]
         ])
         
         # Send the instructions message
-        instructions_message = await msg.reply("To use this bot, please join both @abhicanva by paying and @abyproof channels by clicking the respective links below and then restart the bot.", reply_markup=keyboard)
+        instructions_message = await msg.reply("To use this bot, please join both @abhibots and @abyproof channels by clicking the respective links below and then restart the bot.", reply_markup=keyboard)
         
         # Schedule the deletion of buttons after 10 minutes
         asyncio.create_task(delete_buttons(instructions_message.chat.id, instructions_message.message_id, delay_minutes=10))
