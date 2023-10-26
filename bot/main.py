@@ -47,7 +47,7 @@ async def start_vote(message: types.Message):
             unban_btn = InlineKeyboardButton("Unban", callback_data=f"unban_{user_id}")
             keyboard.add(ban_btn, unban_btn)
             vote_message = await bot.send_message(chat_id=message.chat.id, text='Voting started. Choose an option:', reply_markup=keyboard)
-            await asyncio.sleep(60)  # Wait for 1 minute
+            await asyncio.sleep(300)  # Wait for 1 minute
             await vote_message.delete()  # Delete the vote message
         else:
             await message.reply('You can\'t start a ban vote for an admin or the group owner.')
