@@ -14,6 +14,8 @@ ban_counts = defaultdict(int)
 
 
 
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     welcome_text = """
@@ -24,7 +26,14 @@ Hello! I'm here to help manage this group. Here's what I can do:
 
 Please use these commands responsibly!
     """
-    await message.answer(welcome_text)
+    
+    # Create an inline keyboard with a "Add to Group" button
+    keyboard = InlineKeyboardMarkup()
+    add_to_group_button = InlineKeyboardButton("Add to Group", url=f"https://t.me/banbyvote?startgroup=start")
+    keyboard.add(add_to_group_button)
+
+    await message.answer(welcome_text, reply_markup=keyboard)
+
 
 @dp.message_handler(content_types=['new_chat_members'])
 async def welcome_new_member(message: types.Message):
