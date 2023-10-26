@@ -29,7 +29,7 @@ Please use these commands responsibly!
     
     # Create an inline keyboard with a "Add to Group" button
     keyboard = InlineKeyboardMarkup()
-    add_to_group_button = InlineKeyboardButton("Add to Group", url=f"https://t.me/banbyvotebot?startgroup=start")
+    add_to_group_button = InlineKeyboardButton("Add to Group", url=f"https://t.me/banbyvotebot?start=invite")
     keyboard.add(add_to_group_button)
 
     await message.answer(welcome_text, reply_markup=keyboard)
